@@ -11,7 +11,9 @@ import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.common.api.ResolvableApiException
@@ -22,7 +24,13 @@ import com.google.android.gms.tasks.Task
 
 class MainActivity : AppCompatActivity() {
 
+    private val tag = "MainActivity"
+    private lateinit var latitudeText: TextView
+    private lateinit var longitudeText: TextView
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
+    private lateinit var locationCallback: LocationCallback
     private lateinit var geofencingClient: GeofencingClient//cliente de geovallado
 
     private val runningQOrLater =
@@ -42,6 +50,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        latitudeText = findViewById(R.id.latitude)
+        longitudeText = findViewById(R.id.longitude)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         geofencingClient = LocationServices.getGeofencingClient(this)
 
         if (checkPermissions()){
@@ -49,6 +61,18 @@ class MainActivity : AppCompatActivity() {
             createNotificationChannel()
             createLocationRequestAndcheckSettings()
             //addGeofences()
+        }
+
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                locationResult ?: return
+                for (location in locationResult.locations){
+                    // Update UI with location data
+
+                    latitudeText.text = location.latitude.toString()
+                    longitudeText.text = location.longitude.toString()
+                }
+            }
         }
 
     }
@@ -123,6 +147,7 @@ class MainActivity : AppCompatActivity() {
             // ...
             Log.i(TAG,"Success check settings")
             addGeofences()
+            startLocationUpdates()
 
         }
 
@@ -143,6 +168,23 @@ class MainActivity : AppCompatActivity() {
                     //sendEx.printStackTrace()
                     Log.e(TAG, "Error getting location settings resolution: " + sendEx.message)
                 }
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun addGeofences() {
+
+        geofencingClient.addGeofences(createGeofence(), geofencePendingIntent)?.run {
+            addOnSuccessListener {
+                // Geofences added
+                //statusText.text = "success2"
+                Log.i(TAG, "Adding geofences")
+            }
+            addOnFailureListener {
+                // Failed to add geofences
+
+                Log.e(TAG, "Fail adding geofences")
             }
         }
     }
@@ -189,20 +231,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun addGeofences() {
+    private fun startLocationUpdates() {
 
-        geofencingClient.addGeofences(createGeofence(), geofencePendingIntent)?.run {
-            addOnSuccessListener {
-                // Geofences added
-                //statusText.text = "success2"
-                Log.i(TAG, "Adding geofences")
-            }
-            addOnFailureListener {
-                // Failed to add geofences
+        fusedLocationClient.requestLocationUpdates(locationRequest,
+            locationCallback,
+            Looper.getMainLooper())
 
-                Log.e(TAG, "Fail adding geofences")
-            }
-        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        removeGeofences()
     }
 
     private fun removeGeofences() {
@@ -216,11 +255,6 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "Fail removing geofences")
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        removeGeofences()
     }
 }
 
