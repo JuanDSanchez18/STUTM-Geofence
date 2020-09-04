@@ -30,5 +30,5 @@ internal object GeofencingConstants {
 
         )
 
-    const val GEOFENCE_RADIUS_IN_METERS = 100f
+    const val GEOFENCE_RADIUS_IN_METERS = 10f
 }

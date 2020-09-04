@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         geofencingClient = LocationServices.getGeofencingClient(this)
 
         if (checkPermissions()){
-            Log.i(TAG,"Success check Permissions")
+            Log.i(tag,"Success check Permissions")
             createNotificationChannel()
             createLocationRequestAndcheckSettings()
             //addGeofences()
@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity() {
             // All location settings are satisfied. The client can initialize
             // location requests here.
             // ...
-            Log.i(TAG,"Success check settings")
+            Log.i(tag,"Success check settings")
             addGeofences()
             startLocationUpdates()
 
@@ -166,7 +166,7 @@ class MainActivity : AppCompatActivity() {
                 } catch (sendEx: IntentSender.SendIntentException) {
                     // Ignore the error.
                     //sendEx.printStackTrace()
-                    Log.e(TAG, "Error getting location settings resolution: " + sendEx.message)
+                    Log.e(tag, "Error getting location settings resolution: " + sendEx.message)
                 }
             }
         }
@@ -179,12 +179,12 @@ class MainActivity : AppCompatActivity() {
             addOnSuccessListener {
                 // Geofences added
                 //statusText.text = "success2"
-                Log.i(TAG, "Adding geofences")
+                Log.i(tag, "Adding geofences")
             }
             addOnFailureListener {
                 // Failed to add geofences
 
-                Log.e(TAG, "Fail adding geofences")
+                Log.e(tag, "Fail adding geofences")
             }
         }
     }
@@ -197,7 +197,7 @@ class MainActivity : AppCompatActivity() {
         for (count in GeofencingConstants.Station_TM) {//posible error
 
             //val constants = GeofencingConstants.LANDMARK_DATA[i]
-            Log.i(TAG,"Add geofences: ${count.key}")
+            Log.i(tag,"Add geofences: ${count.key}")
 
             geofenceList.add(
                 Geofence.Builder()
@@ -248,16 +248,16 @@ class MainActivity : AppCompatActivity() {
         geofencingClient.removeGeofences(geofencePendingIntent)?.run {
             addOnSuccessListener {
                 // Geofences removed
-                Log.i(TAG, "Removing geofences")
+                Log.i(tag, "Removing geofences")
             }
             addOnFailureListener {
                 // Failed to remove geofences
-                Log.e(TAG, "Fail removing geofences")
+                Log.e(tag, "Fail removing geofences")
             }
         }
     }
 }
 
-private const val TAG = "MainActivity"
+
 
 
